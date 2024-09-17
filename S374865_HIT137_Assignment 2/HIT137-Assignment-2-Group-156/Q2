@@ -1,0 +1,16 @@
+
+
+import time
+current_time = int(time.time())
+generated_number = (current_time % 100) + 50
+
+if generated_number % 2 == 0:
+    generated_number += 10
+
+print(generated_number)
+
+from PIL import Image
+#filename = "chapter1"
+image_path = 'C:\\Users\\ssimm\\Documents\\HIT137 Assignment 2 Info'
+image1 = Image.open('chapter1')
+image1.show()
