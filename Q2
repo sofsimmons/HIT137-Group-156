@@ -1,0 +1,44 @@
+# Assignment 2, Question 2
+
+# Generate a number
+import time
+current_time = int(time.time())
+generated_number = (current_time % 100) + 50
+
+if generated_number % 2 == 0:
+    generated_number += 10
+
+print(generated_number)
+
+# Import Image
+from PIL import Image
+file_path = (r'C:/Users/ssimm/OneDrive/Desktop/S374865_HIT137_Assignment 2/HIT137-Assignment-2-Group-156/chapter1.jpg')
+img1 = Image.open(file_path)
+
+# Retrieve and change RGB values of image
+def pix_values(img1 , generated_number):
+    img1 = img1.convert('RGB')
+    pixels = img1.load()
+    width, height = img1.size
+
+    sum_red = 0
+
+    for y in range(height):
+        for x in range(width):
+            r, g, b = pixels[x, y]
+            r = min(255, max(0, r + generated_number))
+            g = min(255, max(0, g + generated_number))
+            b = min(255, max(0, b + generated_number))
+            pixels[x, y] = (r, g, b)
+
+            sum_red += r
+
+    img1.show()
+
+    return sum_red
+sum_all_red = pix_values(img1, generated_number)
+
+# Add all r values
+print(f"Sum of all red values is: {sum_all_red}")
+
+#NOT FINISHED

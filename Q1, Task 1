@@ -1,0 +1,22 @@
+# Assignment 2, Question 1, Task 1
+
+import pandas as pd
+import os
+
+inputf = r'C:/Users/ssimm/OneDrive/Desktop/S374865_HIT137_Assignment 2/HIT137-Assignment-2-Group-156/CSV Folder'
+outputf = r'C:/Users/ssimm/OneDrive/Desktop/S374865_HIT137_Assignment 2/HIT137-Assignment-2-Group-156/combined_text.txt'
+
+def extract_files(inputf, outputf):
+    combined_text = []
+    for filename in os.listdir(inputf):
+        if filename.endswith('.csv'):
+            file_path = os.path.join(inputf, filename)
+            df = pd.read_csv(file_path)
+            text = df.to_csv(index = False, header = False)
+            combined_text.append(text.strip())
+
+    with open(outputf, 'w') as file:
+        file.write("\n".join(combined_text))
+    print(f"combined CSV text saved to{combined_text}")
+
+extract_files(inputf, outputf)
