@@ -1,0 +1,37 @@
+string = "Abc7j8gZkl09jhn1n5h4g"
+
+#separate numbers and letters
+def letters_numbers(s):
+    letters = ''.join([char for char in s if char.isalpha()])
+    numbers = ''.join([char for char in s if char.isdigit()])
+    
+    return letters, numbers
+
+letters, numbers = letters_numbers(string)
+
+print(f'the letters in the string are',{letters})
+print(f'the numbers in the string are',{numbers})
+
+#convert even no. to ascii
+def even_ascii(numbers):
+    asciiv = []
+    for char in numbers:
+        if int(char) % 2 == 0:
+            asciiv.append(str(ord(char)))
+    return ','.join(asciiv)
+
+answer = even_ascii(numbers)
+
+print(f"list of numbers where even numbers are converted to ascii:",{answer})
+
+#uppercase to ascii
+def upper_ascii(s):
+    asciiletters = []
+    for char in s:
+        if char.isupper():
+            asciiletters.append(str(ord(char)))
+    return ','.join(asciiletters)
+
+answer2 = upper_ascii(letters)
+
+print(f"the ascii values of uppercase letters in letter string are:", {answer2})

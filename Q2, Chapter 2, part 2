@@ -1,0 +1,13 @@
+inputstring = "An ornange a day keeps the doctor away!"
+key = 5
+
+def string_cryptogram(text, shift):
+    encrtext = []
+    for char in text:
+        shiftb = ord('A') if char.isupper() else ord('a')
+        new = chr((ord(char) - shiftb + shift)% 26 +shiftb)
+        encrtext.append(new)
+    return ''.join(encrtext)
+
+cryptogram = string_cryptogram(inputstring, key)
+print(f"cryptogram:", {cryptogram})
