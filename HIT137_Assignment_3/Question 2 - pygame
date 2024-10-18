@@ -1,0 +1,65 @@
+import pygame
+import os
+pygame.init()
+
+window_size = (800, 600)
+screen = pygame.display.set_mode(window_size)
+pygame.display.set_caption("Rabbit Rendevous!")
+
+def load_images(file_name):
+    return pygame.image.load(os.path.join('assets', 'images', file_name))
+
+bunny_image = load_image('bunny.png')
+magician_image = load_image('magician.png')
+box_image = load_image('box.png')
+carrot_image = load_image('carrot.png')
+projectile_bunny_image = load_image('magic projectile rabbit')
+projectile_magician_image = load_image('magic projectile witch wizard')
+
+rabbit_health = 20
+projectiles = []
+
+class Rabbit:
+    def __init__(self, x, y):
+        self.image = bunny_image
+        self.rect = self.image.get_rect(topleft=(x,y))
+        self.health = 20
+    def jump(self):
+        pass
+    def shoot(self):
+        pass
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+class Magician:
+    def __init__(self, x, y):
+        self.image = magician_image
+        self.rect = self.image.get_rect(topleft=(x, y))
+    def shoot(self):
+        pass
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+class Box:
+    def __init__(self, x, y):
+        self.image = box_image
+        self.rect = self.image.get_rect(topleft=(x, y))
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+class Carrot:
+    def __init__(self, x, y):
+        self.image = carrot_image
+        self.rect = self.image.get_rect(topleft=(x, y))
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+class Projectile:
+    def __init__(self, x, y, direction):
+        self.image = projectile_bunny_image if direction == 'bunny' else projectile_magician_image
+        self.rect = self.image.get_rect(center=(x, y))
+        self.direction = direction
+    def update(self):
+        pass
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
