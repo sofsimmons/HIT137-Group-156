@@ -1,0 +1,204 @@
+import pygame
+import random
+
+pygame.init()
+
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+FPS = 60
+magician_projscatter = 5
+bg_scroll_speed = 5
+ground_y = SCREEN_HEIGHT - 70
+
+def load_image(filename):
+    return pygame.image.load(filename).convert_alpha()
+
+#screen
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption('Runaway Rabbit!')
+
+#images
+rabbit_img = pygame.image.load('images/rabbit.png')
+rabbit_img = pygame.transform.scale((rabbit_img), (100, 100))
+magician_img = pygame.image.load('images/magician.png')
+magician_img = pygame.transform.scale(load_image('images/magician.png'), (int(magician_img.get_width() * 0.85), int(magician_img.get_height() * 0.85)))
+carrot_img = pygame.image.load('images/carrot.png')
+rabbit_projectile_img = pygame.image.load('images/rabbit_projectile.png')
+magician_projectile_img = pygame.image.load('images/magician_projectile.png')
+lvl1background_img = pygame.image.load('images/level1.png')
+
+
+# Classes
+class Rabbit:
+    def __init__(self):
+        self.image = rabbit_img
+        self.rect = self.image.get_rect()
+        self.rect.centerx = SCREEN_WIDTH // 2
+        self.rect.bottom = ground_y
+        self.health = 20
+        self.projectiles = []
+        self.carrot_count = 0
+        self.velocity_y = 0
+        self.is_jumping = False
+        self.velocity_x = 5
+    
+    def move(self):
+        self.rect.x += self.velocity_x
+        if self.rect.left < 0 or self.rect.right > SCREEN_WIDTH:
+            self.velocity_x = -self.velocity_x
+    
+    def shoot(self):
+        projectile = RabbitProjectile(self.rect.centerx, self.rect.top)
+        self.projectiles.append(projectile)
+
+    def jump(self):
+        if not self.is_jumping:
+            self.is_jumping = True
+            self.velocity_y = -15
+
+    def update(self):
+        self.move()
+        if self.is_jumping:
+            self.velocity_y += 1
+            self.rect.y += self.velocity_y
+            if self.rect.y >= ground_y:
+                self.rect.y = ground_y
+                self.is_jumping = False
+
+        global bg_offset
+        bg_offset = self.rect.x * 0.1
+
+    def collect_carrot(self):
+        self.carrot_count += 1
+
+class Magician:
+    def __init__(self, rabbit):
+        self.image = magician_img
+        self.rect = self.image.get_rect()
+        self.rect.x = 50
+        self.rect.y = rabbit.rect.y - 200
+        self.projectiles = []
+        self.rabbit = rabbit
+    
+    def move(self):
+        self.rect.y = self.rabbit.rect.y
+
+    def shoot(self):
+        angle_offset = random.randint(-magician_projscatter, magician_projscatter)
+        projectile = MagicianProjectile(self.rect.centerx, self.rect.bottom, angle_offset)
+        self.projectiles.append(projectile)
+
+class RabbitProjectile:
+    def __init__(self, x, y):
+        self.image = rabbit_projectile_img
+        self.rect = self.image.get_rect(center=(x, y))
+    def update(self):
+        self.rect.x += 10
+        return self.rect.x > SCREEN_WIDTH
+
+class MagicianProjectile:
+    def __init__(self, x, y, angle_offset):
+        self.image = magician_projectile_img
+        self.rect = self.image.get_rect(center=(x, y))
+        self.velocity_x = 10 + angle_offset
+        self.velocity_y = random.randint(-3, 3)
+    def update(self):
+        self.rect.x += self.velocity_x
+        self.rect.y += self.velocity_y
+        return (self.rect.x > SCREEN_WIDTH or self.rect.y < 0 or self.rect.y > SCREEN_HEIGHT)
+
+class Carrot:
+    def __init__(self, x, y):
+        self.image = carrot_img
+        self.rect = self.image.get_rect(topleft=(x, y))
+    def create_carrots(num):
+        return [Carrot(random.randint(0, SCREEN_WIDTH - 50), random.randint(100, SCREEN_HEIGHT - 200)) for _ in range(num)]
+
+def create_carrots(num):
+    return [Carrot(random.randint(0, SCREEN_WIDTH - 50), random.randint(100, SCREEN_HEIGHT - 200)) for _ in range (num)]
+
+#main loop
+def main():
+    clock = pygame.time.Clock()
+    rabbit = Rabbit()
+    magician = Magician(rabbit)
+    magician.rect.y = rabbit.rect.y
+    carrots = create_carrots(5)
+    last_shoot_time = 0
+    running = True
+    bx1 = 0
+    bx2 = lvl1background_img.get_width()
+    
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    rabbit.jump()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                rabbit.shoot()
+
+        rabbit.update()
+        magician.move()
+
+        current_time = pygame.time.get_ticks()
+        if current_time - last_shoot_time > 2000:
+            magician.shoot()
+            last_shoot_time = current_time
+
+        #projectiles
+        for projectile in rabbit.projectiles[:]:
+            if projectile.update():
+                rabbit.projectiles.remove(projectile)
+        
+        for projectile in magician.projectiles[:]:
+            if projectile.update():
+                magician.projectiles.remove(projectile)
+            #collision
+            if projectile.rect.colliderect(rabbit.rect):
+                rabbit.health -= 2
+                magician.projectiles.remove(projectile)
+
+        for carrot in carrots[:]:
+            if rabbit.rect.colliderect(carrot.rect):
+                rabbit.collect_carrot()
+                carrots.remove(carrot)
+        
+        screen.fill((0, 0, 0))
+        bx1 -= bg_scroll_speed
+        bx2 -= bg_scroll_speed
+        if bx1 <= -lvl1background_img.get_width():
+            bx1 = bx2 + lvl1background_img.get_width()
+        if bx2 <= -lvl1background_img.get_width():
+            bx2 = bx1 + lvl1background_img.get_width()
+
+        screen.blit(lvl1background_img, (bx1, 0))
+        screen.blit(lvl1background_img, (bx2, 0))
+        screen.blit(rabbit.image, rabbit.rect)
+        screen.blit(magician.image, magician.rect)
+
+        for carrot in carrots:
+            screen.blit(carrot.image, carrot.rect)
+
+        for projectile in rabbit.projectiles:
+            screen.blit(projectile.image, projectile.rect)
+
+        for projectile in magician.projectiles:
+            screen.blit(projectile.image, projectile.rect)
+        
+        #Rabbit health bar
+        pygame.draw.rect(screen, (255, 0, 0), (rabbit.rect.centerx - 20, rabbit.rect.y - 20, 40, 10))
+        pygame.draw.rect(screen, (0, 255, 0), (rabbit.rect.centerx - 20, rabbit.rect.y - 30, rabbit.health * 2, 10 ))
+
+        #carrot counter
+        font = pygame.font.Font(None, 36)
+        text = font.render(f'Carrot Count: {rabbit.carrot_count}', True, (255, 255, 255))
+        screen.blit(text, (SCREEN_WIDTH - 150, 10))
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
+    pygame.quit()
+
+if __name__=="__main__":
+    main()
