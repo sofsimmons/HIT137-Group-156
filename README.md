@@ -1,1 +1,1 @@
-This is a project file for assignment 2 of HIT137 using python code.
+This is a GitHub for HIT137 Assignment 2 and 3
